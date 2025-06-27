@@ -34,7 +34,7 @@ int evaluate(int p1, int p2) {
 }
 
 void *client_handler(void *arg) {
-    int idx = *(int *)arg;
+    int idx = *(int *)arg; //prende il valore passato come puntatore e lo mette nella variabile idx
     free(arg);
 
     char buffer[BUFFER_SIZE];
@@ -49,7 +49,7 @@ void *client_handler(void *arg) {
     buffer[n] = '\0';
     strncpy(player->name, buffer, sizeof(player->name));
 
-    printf("🔗 Giocatore connesso: %s\n", player->name);
+    printf("Giocatore connesso: %s\n", player->name);
 
     // Attendi entrambi i giocatori
     while (1) {
@@ -67,7 +67,7 @@ void *client_handler(void *arg) {
         send(player->sockfd, buffer, strlen(buffer), 0);
 
         // Chiede la mossa
-        send(player->sockfd, "Inserisci la tua mossa (1=Rock, 2=Paper, 3=Scissors): ", 54, 0);
+        send(player->sockfd, "Inserisci la tua mossa (1=Rock, 2=Paper, 3=Scissors): ", sizeof(msg), 0);
 
         // Riceve mossa
         n = recv(player->sockfd, buffer, sizeof(buffer) - 1, 0);
@@ -75,7 +75,7 @@ void *client_handler(void *arg) {
         buffer[n] = '\0';
         player->move = atoi(buffer);
 
-        printf("🕹️ %s ha scelto %d\n", player->name, player->move);
+        printf("%s ha scelto %d\n", player->name, player->move);
 
         // Attendi mossa avversario
         while (1) {
@@ -95,11 +95,11 @@ void *client_handler(void *arg) {
 
         char msg[BUFFER_SIZE];
         if (winner == 0) {
-            snprintf(msg, sizeof(msg), "⚔️ Round %d: Pareggio! Entrambi hanno scelto %d.\n", round, player->move);
+            snprintf(msg, sizeof(msg), "Round %d: Pareggio! Entrambi hanno scelto %d.\n", round, player->move);
         } else if ((winner == 1 && idx == 0) || (winner == 2 && idx == 1)) {
-            snprintf(msg, sizeof(msg), "🏆 Round %d: Hai vinto! Tu: %d, Avversario: %d\n", round, player->move, players[1 - idx].move);
+            snprintf(msg, sizeof(msg), "Round %d: Hai vinto! Tu: %d, Avversario: %d\n", round, player->move, players[1 - idx].move);
         } else {
-            snprintf(msg, sizeof(msg), "💥 Round %d: Hai perso! Tu: %d, Avversario: %d\n", round, player->move, players[1 - idx].move);
+            snprintf(msg, sizeof(msg), "Round %d: Hai perso! Tu: %d, Avversario: %d\n", round, player->move, players[1 - idx].move);
         }
 
         send(player->sockfd, msg, strlen(msg), 0);
@@ -118,15 +118,15 @@ void *client_handler(void *arg) {
     pthread_mutex_unlock(&mutex);
 
     if (my_score > opp_score) {
-        snprintf(buffer, sizeof(buffer), "\n🏆 Hai vinto la partita! Punteggio: %d - %d\n", my_score, opp_score);
+        snprintf(buffer, sizeof(buffer), "\nHai vinto la partita! Punteggio: %d - %d\n", my_score, opp_score);
     } else if (my_score < opp_score) {
-        snprintf(buffer, sizeof(buffer), "\n💥 Hai perso la partita! Punteggio: %d - %d\n", my_score, opp_score);
+        snprintf(buffer, sizeof(buffer), "\nHai perso la partita! Punteggio: %d - %d\n", my_score, opp_score);
     } else {
-        snprintf(buffer, sizeof(buffer), "\n⚔️ La partita è finita in pareggio! Punteggio: %d - %d\n", my_score, opp_score);
+        snprintf(buffer, sizeof(buffer), "\nLa partita è finita in pareggio! Punteggio: %d - %d\n", my_score, opp_score);
     }
     send(player->sockfd, buffer, strlen(buffer), 0);
 
-    printf("❌ %s si è disconnesso\n", player->name);
+    printf("%s si è disconnesso\n", player->name);
     close(player->sockfd);
     return NULL;
 }
@@ -152,7 +152,7 @@ int main() {
     }
 
     listen(server_fd, MAX_PLAYERS);
-    printf("🟢 Server Rock Paper Scissors in ascolto sulla porta %d\n", PORT);
+    printf("Server Rock Paper Scissors in ascolto sulla porta %d\n", PORT);
 
     while (connected_players < MAX_PLAYERS) {
         client_sock = malloc(sizeof(int));
